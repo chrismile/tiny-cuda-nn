@@ -132,6 +132,8 @@ enum class Activation {
 	Squareplus,
 	Softplus,
 	Tanh,
+	Snake,
+	SnakeAlt,
 	None,
 };
 

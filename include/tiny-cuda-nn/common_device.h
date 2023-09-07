@@ -39,7 +39,7 @@ namespace tcnn {
 static constexpr float PI = 3.14159265358979323846f;
 static constexpr float SQRT2 = 1.41421356237309504880f;
 
-__host__ __device__ inline float logistic(const float x) {
+__device__ inline float logistic(const float x) {
 	return 1.0f / (1.0f + expf(-x));
 }
 
@@ -100,7 +100,7 @@ inline __host__ __device__ half relu(half val) {
 static constexpr float K_ACT = 10.0f;
 
 template <typename T, typename fragment_t>
-__host__ __device__ void warp_activation(Activation activation, const fragment_t& frag, fragment_t& result) {
+__device__ void warp_activation(Activation activation, const fragment_t& frag, fragment_t& result) {
 	switch (activation) {
 		case Activation::ReLU:
 			TCNN_PRAGMA_UNROLL
@@ -117,13 +117,13 @@ __host__ __device__ void warp_activation(Activation activation, const fragment_t
 		case Activation::Exponential:
 			TCNN_PRAGMA_UNROLL
 			for (int t=0; t < result.num_elements; t++) {
-				result.x[t] = (T)(expf((float)frag.x[t]));
+				result.x[t] = (T)(__expf((float)frag.x[t]));
 			}
 			return;
 		case Activation::Sine:
 			TCNN_PRAGMA_UNROLL
 			for (int t=0; t < result.num_elements; t++) {
-				result.x[t] = (T)(sinf((float)frag.x[t]));
+				result.x[t] = (T)(__sinf((float)frag.x[t]));
 			}
 			return;
 		case Activation::Sigmoid:
@@ -142,13 +142,26 @@ __host__ __device__ void warp_activation(Activation activation, const fragment_t
 		case Activation::Softplus:
 			TCNN_PRAGMA_UNROLL
 			for (int t=0; t < result.num_elements; t++) {
-				result.x[t] = (T)(logf(expf((float)frag.x[t] * K_ACT) + 1.0f) / K_ACT);
+				result.x[t] = (T)(__logf(__expf((float)frag.x[t] * K_ACT) + 1.0f) / K_ACT);
 			}
 			return;
 		case Activation::Tanh:
 			TCNN_PRAGMA_UNROLL
 			for (int t=0; t < result.num_elements; t++) {
 				result.x[t] = (T)(tanhf((float)frag.x[t]));
+			}
+			return;
+		case Activation::Snake:
+			TCNN_PRAGMA_UNROLL
+			for (int t=0; t < result.num_elements; t++) {
+				float sinX = __sinf((float)frag.x[t]);
+				result.x[t] = (T)frag.x[t] + (T)(sinX * sinX);
+			}
+			return;
+		case Activation::SnakeAlt:
+			TCNN_PRAGMA_UNROLL
+			for (int t=0; t < result.num_elements; t++) {
+				result.x[t] = ((T)frag.x[t] + (T)1 - (T)__cosf(2.0f * (float)frag.x[t])) / (T)2;
 			}
 			return;
 		case Activation::None: result = frag; return;

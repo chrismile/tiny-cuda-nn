@@ -90,6 +90,10 @@ Activation string_to_activation(const std::string& activation_name) {
 		return Activation::Softplus;
 	} else if (equals_case_insensitive(activation_name, "Tanh")) {
 		return Activation::Tanh;
+	} else if (equals_case_insensitive(activation_name, "Snake")) {
+		return Activation::Snake;
+	} else if (equals_case_insensitive(activation_name, "SnakeAlt")) {
+		return Activation::SnakeAlt;
 	}
 
 	throw std::runtime_error{fmt::format("Invalid activation name: {}", activation_name)};
@@ -106,6 +110,8 @@ std::string to_string(Activation activation) {
 		case Activation::Squareplus: return "Squareplus";
 		case Activation::Softplus: return "Softplus";
 		case Activation::Tanh: return "Tanh";
+		case Activation::Snake: return "Snake";
+		case Activation::SnakeAlt: return "SnakeAlt";
 		default: throw std::runtime_error{"Invalid activation."};
 	}
 }

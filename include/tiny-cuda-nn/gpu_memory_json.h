@@ -30,6 +30,7 @@
 #pragma once
 
 #include <json/json.hpp>
+#include "gpu_memory.h"
 
 namespace tcnn {
 
@@ -57,7 +58,7 @@ inline void from_json(const nlohmann::json& j, GPUMemory<T>& gpu_data) {
 		json_binary_to_gpu_memory(cpu_data, gpu_data.data(), gpu_data.get_bytes());
 	} else if (j.is_object()) {
 		// https://json.nlohmann.me/features/binary_values/#json
-		json::array_t arr = j["bytes"];
+		nlohmann::json::array_t arr = j["bytes"];
 		nlohmann::json::binary_t cpu_data;
 		cpu_data.resize(arr.size());
 		for(size_t i = 0; i < arr.size(); ++i) {

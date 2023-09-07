@@ -50,7 +50,7 @@ m_output_width{output_width},
 m_n_hidden_layers{n_hidden_layers},
 m_activation{activation},
 m_output_activation{output_activation},
-m_can_fuse_activation{activation != Activation::Sine}
+m_can_fuse_activation{activation != Activation::Sine && activation != Activation::Snake && activation != Activation::SnakeAlt}
 {
 	m_padded_output_width = next_multiple(m_output_width, REQUIRED_ALIGNMENT());
 
@@ -102,7 +102,9 @@ bool compute_layer(
 	if (!is_inference) {
 		// Never disallow fusing if the caller passes the same output and activation_output buffers... in that case,
 		// invertibility of the activation function may be ignored.
-		can_fuse_activation &= activation != Activation::Sine || &output == &activation_output;
+		can_fuse_activation &=
+				(activation != Activation::Sine && activation != Activation::Snake && activation != Activation::SnakeAlt)
+				|| &output == &activation_output;
 	}
 
 	if (can_fuse_activation) {
@@ -358,7 +360,7 @@ void CutlassMLP<T>::initialize_params(pcg32& rnd, float* params_full_precision, 
 
 	// Initialize matrices
 	for (size_t i = 0; i < weight_matrices_full_precision.size(); ++i) {
-		if (m_activation == Activation::Sine) {
+		if (m_activation == Activation::Sine || m_activation == Activation::Snake || m_activation == Activation::SnakeAlt) {
 			if (i == 0) {
 				weight_matrices_full_precision[i].initialize_siren_uniform_first(rnd, scale);
 			} else {
