@@ -37,6 +37,7 @@
 #include <tiny-cuda-nn/encodings/oneblob.h>
 #include <tiny-cuda-nn/encodings/spherical_harmonics.h>
 #include <tiny-cuda-nn/encodings/triangle_wave.h>
+#include <tiny-cuda-nn/encodings/dictionary.h>
 
 
 namespace tcnn {
@@ -113,6 +114,14 @@ auto register_builtin_encodings() {
 	};
 	register_encoding<T>(factories, "OneBlobFrequency", nrc_factory);
 	register_encoding<T>(factories, "NRC", nrc_factory);
+
+	register_encoding<T>(factories, "Dictionary", [](uint32_t n_dims_to_encode, const json& encoding) {
+		return new DictionaryEncoding<T>{
+			encoding.value("num_embeddings", 1u),
+			encoding.value("embedding_dim", 1u),
+			n_dims_to_encode
+		};
+	});
 
 	return factories;
 }
