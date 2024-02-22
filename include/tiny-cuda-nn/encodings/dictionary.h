@@ -71,7 +71,7 @@ __global__ void dictionary_encoding(
         data_out(j, i) = 1;
     } else {
         const uint32_t encoded_input_feature_i = j / num_features;
-        const uint32_t feature_idx = j & num_features;
+        const uint32_t feature_idx = j % num_features;
         const auto dictionary_entry_idx = uint(data_in(encoded_input_feature_i, i));
         data_out(j, i) = dictionary[dictionary_entry_idx * num_features + feature_idx];
     }
